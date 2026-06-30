@@ -21,16 +21,20 @@ public class UserController {
         this.userService = userService;
     }
 
+    // 👤 GET CURRENT LOGGED-IN USER
     @GetMapping("/me")
     public UserProfileResponse getMyProfile(Authentication authentication) {
-        return userService.getMyProfile(authentication.getName());
+        String email = authentication.getName();
+        return userService.getMyProfile(email);
     }
 
+    // ✏️ UPDATE CURRENT USER PROFILE
     @PutMapping("/me")
     public UserProfileResponse updateMyProfile(
             Authentication authentication,
             @RequestBody UpdateProfileRequest request
     ) {
-        return userService.updateMyProfile(authentication.getName(), request);
+        String email = authentication.getName();
+        return userService.updateMyProfile(email, request);
     }
 }

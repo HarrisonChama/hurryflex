@@ -1,7 +1,5 @@
 package com.hurryflex.hurryflex.service.impl;
 
-import java.util.Optional;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,17 +28,19 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // =========================
+    // REGISTER
+    // =========================
     @Override
     public void register(RegisterRequest request) {
 
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-
-        if (existingUser.isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
 
         User user = new User();
         user.setUsername(request.getUsername());
+        user.setProfileName(request.getProfileName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
@@ -48,6 +48,9 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    // =========================
+    // LOGIN
+    // =========================
     @Override
     public LoginResponse login(LoginRequest request) {
 
@@ -66,29 +69,28 @@ public class UserServiceImpl implements UserService {
         return new LoginResponse(token);
     }
 
+    // =========================
+    // PROFILE (ME)
+    // =========================
     @Override
     public UserProfileResponse getMyProfile(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new UserProfileResponse(
-                user.getUsername(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getBio(),
-                user.getProfilePicture(),
-                user.getRole()
-        );
+        return mapToProfile(user);
     }
 
+    // =========================
+    // UPDATE PROFILE
+    // =========================
     @Override
     public UserProfileResponse updateMyProfile(String email, UpdateProfileRequest request) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        user.setProfileName(request.getProfileName());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setBio(request.getBio());
@@ -96,17 +98,12 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        return new UserProfileResponse(
-                user.getUsername(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getBio(),
-                user.getProfilePicture(),
-                user.getRole()
-        );
+        return mapToProfile(user);
     }
 
+    // =========================
+    // ADMIN ACTIONS
+    // =========================
     @Override
     public void promoteToAdmin(Long userId) {
 
@@ -125,5 +122,23 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         userRepository.delete(user);
+    }
+
+    // =========================
+    // DTO MAPPER
+    // =========================
+    private UserProfileResponse mapToProfile(User user) {
+
+        return new UserProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getProfileName(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getBio(),
+                user.getProfilePicture(),
+                user.getRole()
+        );
     }
 }

@@ -10,6 +10,9 @@ public class RegisterRequest {
     @Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters")
     private String username;
 
+    // 🔥 NEW: optional display name (can be null)
+    private String profileName;
+
     @NotBlank(message = "Email is required")
     @Email(message = "Please enter a valid email address")
     private String email;
@@ -21,12 +24,23 @@ public class RegisterRequest {
     public RegisterRequest() {
     }
 
+    // ===== GETTERS AND SETTERS =====
+
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    // 🔥 NEW
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
     }
 
     public String getEmail() {

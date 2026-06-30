@@ -7,6 +7,9 @@ public class UpdateProfileRequest {
     private String bio;
     private String profilePicture;
 
+    // ⭐ NEW FIELD
+    private String profileName;
+
     public UpdateProfileRequest() {}
 
     public String getFirstName() {
@@ -39,5 +42,14 @@ public class UpdateProfileRequest {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    // ⭐ GETTER + SETTER FOR PROFILE NAME
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
     }
 }

@@ -22,6 +22,10 @@ public class User {
     @Column(unique = true)
     private String username;
 
+    // 🔥 NEW: optional display name
+    @Column
+    private String profileName;
+
     private String password;
 
     private String firstName;
@@ -45,7 +49,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    // ===== Getters and Setters =====
+    // ===== GETTERS AND SETTERS =====
 
     public Long getId() {
         return id;
@@ -57,6 +61,15 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    // 🔥 NEW GETTER/SETTER
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
     }
 
     public String getPassword() {
