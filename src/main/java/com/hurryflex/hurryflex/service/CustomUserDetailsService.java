@@ -32,6 +32,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
+
+                // ✅ SINGLE SOURCE OF TRUTH FOR ROLES
                 Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
                 )

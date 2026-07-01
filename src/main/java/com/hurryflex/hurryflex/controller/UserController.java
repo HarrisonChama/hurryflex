@@ -2,7 +2,7 @@ package com.hurryflex.hurryflex.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,20 +21,24 @@ public class UserController {
         this.userService = userService;
     }
 
-    // 👤 GET CURRENT LOGGED-IN USER
+    // Get logged-in user's profile
     @GetMapping("/me")
     public UserProfileResponse getMyProfile(Authentication authentication) {
+
         String email = authentication.getName();
+
         return userService.getMyProfile(email);
     }
 
-    // ✏️ UPDATE CURRENT USER PROFILE
-    @PutMapping("/me")
+    // Update logged-in user's profile
+    @PatchMapping("/me")
     public UserProfileResponse updateMyProfile(
             Authentication authentication,
             @RequestBody UpdateProfileRequest request
     ) {
+
         String email = authentication.getName();
+
         return userService.updateMyProfile(email, request);
     }
 }

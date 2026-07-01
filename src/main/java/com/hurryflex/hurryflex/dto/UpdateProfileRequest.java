@@ -2,15 +2,24 @@ package com.hurryflex.hurryflex.dto;
 
 public class UpdateProfileRequest {
 
+    private String profileName;
     private String firstName;
     private String lastName;
     private String bio;
     private String profilePicture;
 
-    // ⭐ NEW FIELD
-    private String profileName;
+    private Boolean isPrivate;
 
-    public UpdateProfileRequest() {}
+    public UpdateProfileRequest() {
+    }
+
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -44,12 +53,11 @@ public class UpdateProfileRequest {
         this.profilePicture = profilePicture;
     }
 
-    // ⭐ GETTER + SETTER FOR PROFILE NAME
-    public String getProfileName() {
-        return profileName;
+    public Boolean getIsPrivate() {
+        return isPrivate;
     }
 
-    public void setProfileName(String profileName) {
-        this.profileName = profileName;
+    public void setIsPrivate(Boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 }

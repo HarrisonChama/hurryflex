@@ -127,18 +127,26 @@ public class UserServiceImpl implements UserService {
     // =========================
     // DTO MAPPER
     // =========================
-    private UserProfileResponse mapToProfile(User user) {
+private UserProfileResponse mapToProfile(User user) {
 
-        return new UserProfileResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getProfileName(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getBio(),
-                user.getProfilePicture(),
-                user.getRole()
-        );
-    }
+    return new UserProfileResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getProfileName(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getBio(),
+            user.getProfilePicture(),
+
+            // SOCIAL METRICS (temporary defaults if not in entity yet)
+            0L,   // followersCount
+            0L,   // followingCount
+            0L,   // postsCount
+            0L,   // likesCount
+
+            false, // isPrivate (default for now)
+
+            user.getRole()
+    );
+}
 }
