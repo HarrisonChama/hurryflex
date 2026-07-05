@@ -7,33 +7,52 @@ import com.hurryflex.hurryflex.model.ReactionType;
 
 public class PostFeedResponse {
 
-    // The actual post content
     private Post post;
 
-    // Reaction breakdown: LIKE → 10, LOVE → 5 etc
     private Map<ReactionType, Long> reactions;
 
-    // Total reactions count
     private long totalReactions;
 
-    // Most dominant reaction emoji (for preview)
-    private String topReactionPreview;
+    private String topReactionEmoji;
 
-    // Human readable summary like "15 reactions"
     private String humanSummary;
+
+    // Facebook-style text
+    private String facebookStyleText;
 
     public PostFeedResponse() {}
 
-    public PostFeedResponse(Post post,
-                            Map<ReactionType, Long> reactions,
-                            long totalReactions,
-                            String topReactionPreview,
-                            String humanSummary) {
+    public PostFeedResponse(
+            Post post,
+            Map<ReactionType, Long> reactions,
+            long totalReactions,
+            String topReactionEmoji,
+            String humanSummary
+    ) {
         this.post = post;
         this.reactions = reactions;
         this.totalReactions = totalReactions;
-        this.topReactionPreview = topReactionPreview;
+        this.topReactionEmoji = topReactionEmoji;
         this.humanSummary = humanSummary;
+
+        // SAFE: no overridable method call
+        this.facebookStyleText = buildFacebookText(totalReactions);
+    }
+
+    // =========================
+    // SAFE BUILDER METHOD
+    // =========================
+    private String buildFacebookText(long total) {
+
+        if (total == 0) {
+            return "No reactions yet";
+        }
+
+        if (total == 1) {
+            return "1 person reacted";
+        }
+
+        return "👍 " + total + " reactions";
     }
 
     // =========================
@@ -62,14 +81,15 @@ public class PostFeedResponse {
 
     public void setTotalReactions(long totalReactions) {
         this.totalReactions = totalReactions;
+        this.facebookStyleText = buildFacebookText(totalReactions);
     }
 
-    public String getTopReactionPreview() {
-        return topReactionPreview;
+    public String getTopReactionEmoji() {
+        return topReactionEmoji;
     }
 
-    public void setTopReactionPreview(String topReactionPreview) {
-        this.topReactionPreview = topReactionPreview;
+    public void setTopReactionEmoji(String topReactionEmoji) {
+        this.topReactionEmoji = topReactionEmoji;
     }
 
     public String getHumanSummary() {
@@ -78,5 +98,13 @@ public class PostFeedResponse {
 
     public void setHumanSummary(String humanSummary) {
         this.humanSummary = humanSummary;
+    }
+
+    public String getFacebookStyleText() {
+        return facebookStyleText;
+    }
+
+    public void setFacebookStyleText(String facebookStyleText) {
+        this.facebookStyleText = facebookStyleText;
     }
 }

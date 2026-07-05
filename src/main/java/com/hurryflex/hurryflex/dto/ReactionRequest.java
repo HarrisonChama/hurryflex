@@ -5,18 +5,16 @@ import com.hurryflex.hurryflex.model.ReactionType;
 
 public class ReactionRequest {
 
+    private Long targetId;
+    private ReactionTargetType targetType;
     private ReactionType type;
 
-    private ReactionTargetType targetType;
-
-    private Long targetId;
-
-    public ReactionType getType() {
-        return type;
+    public Long getTargetId() {
+        return targetId;
     }
 
-    public void setType(ReactionType type) {
-        this.type = type;
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 
     public ReactionTargetType getTargetType() {
@@ -27,11 +25,11 @@ public class ReactionRequest {
         this.targetType = targetType;
     }
 
-    public Long getTargetId() {
-        return targetId;
+    public ReactionType getType() {
+        return type;
     }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
+    public void setType(ReactionType type) {
+        this.type = type;
     }
 }

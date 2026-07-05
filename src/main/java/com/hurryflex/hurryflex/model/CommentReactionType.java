@@ -1,12 +1,11 @@
 package com.hurryflex.hurryflex.model;
 
-public enum ReactionType {
+public enum CommentReactionType {
     LIKE,
     LOVE,
     HAHA,
     WOW,
     SAD,
     ANGRY,
-    CARE,
-    DISGUST
+    CARE
 }

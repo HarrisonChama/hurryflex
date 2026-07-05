@@ -12,4 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByAuthor(User author);
 
     List<Post> findAllByOrderByCreatedAtDesc();
+
+    long countByAuthor(User author); // ✅ THIS IS THE MISSING ONE
 }

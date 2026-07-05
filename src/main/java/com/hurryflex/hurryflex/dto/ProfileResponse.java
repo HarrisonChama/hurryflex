@@ -1,44 +1,21 @@
-package com.hurryflex.hurryflex.model;
+package com.hurryflex.hurryflex.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+public class ProfileResponse {
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "users")
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String username;
 
-    @Column
     private String profileName;
-
-    @JsonIgnore
-    private String password;
 
     private String firstName;
 
     private String lastName;
 
-    @Column(unique = true)
     private String email;
 
-    @Column(length = 500)
     private String bio;
 
     private String profilePicture;
@@ -53,21 +30,25 @@ public class User {
 
     private String gender;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    // Statistics
+    private long posts;
 
-    private LocalDateTime createdAt;
+    private long followers;
 
-    public User() {
-        this.createdAt = LocalDateTime.now();
-    }
+    private long following;
 
-    // ==========================
+    private long totalReactions;
+
+    // =========================
     // GETTERS & SETTERS
-    // ==========================
+    // =========================
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -84,14 +65,6 @@ public class User {
 
     public void setProfileName(String profileName) {
         this.profileName = profileName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getFirstName() {
@@ -174,19 +147,35 @@ public class User {
         this.gender = gender;
     }
 
-    public Role getRole() {
-        return role;
+    public long getPosts() {
+        return posts;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setPosts(long posts) {
+        this.posts = posts;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public long getFollowers() {
+        return followers;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setFollowers(long followers) {
+        this.followers = followers;
+    }
+
+    public long getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(long following) {
+        this.following = following;
+    }
+
+    public long getTotalReactions() {
+        return totalReactions;
+    }
+
+    public void setTotalReactions(long totalReactions) {
+        this.totalReactions = totalReactions;
     }
 }

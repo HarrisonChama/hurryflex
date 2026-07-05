@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.hurryflex.hurryflex.dto.CreatePostRequest;
 import com.hurryflex.hurryflex.dto.PostFeedResponse;
+import com.hurryflex.hurryflex.dto.ReactionSummaryResponse;
 import com.hurryflex.hurryflex.model.Post;
+import com.hurryflex.hurryflex.model.Reaction;
 import com.hurryflex.hurryflex.model.ReactionTargetType;
 import com.hurryflex.hurryflex.model.ReactionType;
 import com.hurryflex.hurryflex.model.User;
@@ -24,9 +26,11 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final ReactionRepository reactionRepository;
 
-    public PostServiceImpl(PostRepository postRepository,
-                           UserRepository userRepository,
-                           ReactionRepository reactionRepository) {
+    public PostServiceImpl(
+            PostRepository postRepository,
+            UserRepository userRepository,
+            ReactionRepository reactionRepository) {
+
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.reactionRepository = reactionRepository;
@@ -89,57 +93,67 @@ public class PostServiceImpl implements PostService {
     }
 
     // =========================
-    // FACEBOOK FEED (WARNING-FIXED)
+    // FACEBOOK FEED
     // =========================
     @Override
     public List<PostFeedResponse> getFeed(String email) {
 
         List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
 
-        return posts.stream().map(post -> {
+        return posts.stream()
+                .map(post -> {
 
-            var reactions = reactionRepository
-                    .findByTargetTypeAndTargetId(
-                            ReactionTargetType.POST,
-                            post.getId()
+                    ReactionSummaryResponse summary = getReactionSummary(post.getId());
+
+                    return new PostFeedResponse(
+                            post,
+                            summary.getBreakdown(),
+                            summary.getTotalReactions(),
+                            summary.getTopReactionEmoji(),
+                            summary.getSummaryText()
                     );
+                })
+                .toList();
+    }
 
-            // ✅ FIXED: NO METHOD REFERENCE (removes warning)
-            Map<ReactionType, Long> reactionCounts =
-                    reactions.stream()
-                            .filter(r -> r.getType() != null)
-                            .collect(Collectors.groupingBy(
-                                    r -> r.getType(),
-                                    Collectors.counting()
-                            ));
+    // =========================
+    // REACTION SUMMARY
+    // =========================
+    @Override
+    public ReactionSummaryResponse getReactionSummary(Long postId) {
 
-            long totalReactions =
-                    reactionCounts.values()
-                            .stream()
-                            .mapToLong(value -> value)
-                            .sum();
+        List<Reaction> reactions =
+                reactionRepository.findByTargetTypeAndTargetId(
+                        ReactionTargetType.POST,
+                        postId
+                );
 
-            // ✅ FIXED: SAFE MAX (no Map.Entry method reference)
-            ReactionType topReaction =
-                    reactionCounts.entrySet()
-                            .stream()
-                            .max((a, b) -> Long.compare(a.getValue(), b.getValue()))
-                            .map(entry -> entry.getKey())
-                            .orElse(null);
+        Map<ReactionType, Long> breakdown =
+                reactions.stream()
+                        .filter(reaction -> reaction.getType() != null)
+                        .collect(Collectors.groupingBy(
+                                Reaction::getType,
+                                Collectors.counting()
+                        ));
 
-            String topEmoji = getEmoji(topReaction);
+        long totalReactions = reactions.size();
 
-            String summary = totalReactions + " reactions";
+        ReactionType topReaction =
+                breakdown.entrySet()
+                        .stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
 
-            return new PostFeedResponse(
-                    post,
-                    reactionCounts,
-                    totalReactions,
-                    topEmoji,
-                    summary
-            );
+        String emoji = getEmoji(topReaction);
 
-        }).toList();
+        ReactionSummaryResponse response = new ReactionSummaryResponse();
+        response.setBreakdown(breakdown);
+        response.setTotalReactions(totalReactions);
+        response.setTopReactionEmoji(emoji);
+        response.setSummaryText(totalReactions + " reactions");
+
+        return response;
     }
 
     // =========================
@@ -147,16 +161,18 @@ public class PostServiceImpl implements PostService {
     // =========================
     private String getEmoji(ReactionType type) {
 
-        if (type == null) return "";
+        if (type == null) {
+            return "";
+        }
 
         return switch (type) {
             case LIKE -> "👍";
             case LOVE -> "❤️";
+            case CARE -> "🥰";
             case HAHA -> "😂";
             case WOW -> "😲";
             case SAD -> "😥";
             case ANGRY -> "😡";
-            case CARE -> "🥰";
             case DISGUST -> "🤮";
         };
     }
