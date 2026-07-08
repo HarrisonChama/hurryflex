@@ -36,28 +36,28 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+            // 🚨 CRITICAL FIX (THIS IS OFTEN THE 403 CAUSE)
             .csrf(csrf -> csrf.disable())
+
             .sessionManagement(session ->
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+
             .authorizeHttpRequests(auth -> auth
 
-                // PUBLIC
+                // PUBLIC ENDPOINTS
                 .requestMatchers(
                         "/auth/**",
-                        "/",
-                        "/home",
                         "/v3/api-docs/**",
-                        "/swagger-ui/**"
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
                 ).permitAll()
 
-                // ADMIN ONLY ENDPOINTS
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                // EVERYTHING ELSE
+                // EVERYTHING ELSE REQUIRES AUTH
                 .anyRequest().authenticated()
             )
-            // 🔥 IMPORTANT FIX (THIS WAS MISSING)
+
+            // 🚨 CRITICAL FIX: JWT FILTER MUST RUN BEFORE AUTH
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

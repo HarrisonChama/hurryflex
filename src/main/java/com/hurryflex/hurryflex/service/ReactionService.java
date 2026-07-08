@@ -6,7 +6,7 @@ import com.hurryflex.hurryflex.model.ReactionTargetType;
 
 public interface ReactionService {
 
-    void react(String email, ReactionRequest request);
+    ReactionSummaryResponse react(String email, ReactionRequest request);
 
-    ReactionSummaryResponse getReactionSummary(ReactionTargetType targetType, Long targetId);
+    ReactionSummaryResponse getReactions(ReactionTargetType targetType, Long targetId);
 }

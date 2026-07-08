@@ -5,6 +5,7 @@ import com.hurryflex.hurryflex.model.Role;
 public class UserProfileResponse {
 
     private Long id;
+    private String email;   // ✅ ADDED
     private String username;
     private String profileName;
 
@@ -29,6 +30,7 @@ public class UserProfileResponse {
 
     public UserProfileResponse(
             Long id,
+            String email,
             String username,
             String profileName,
             String firstName,
@@ -43,6 +45,7 @@ public class UserProfileResponse {
             Role role
     ) {
         this.id = id;
+        this.email = email;
         this.username = username;
         this.profileName = profileName;
         this.firstName = firstName;
@@ -57,7 +60,9 @@ public class UserProfileResponse {
         this.role = role;
     }
 
+    // ==========================
     // GETTERS & SETTERS
+    // ==========================
 
     public Long getId() {
         return id;
@@ -65,6 +70,16 @@ public class UserProfileResponse {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    // ✅ ADDED
+    public String getEmail() {
+        return email;
+    }
+
+    // ✅ ADDED
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getUsername() {

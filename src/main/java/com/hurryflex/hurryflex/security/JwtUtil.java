@@ -3,48 +3,69 @@ package com.hurryflex.hurryflex.security;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+@Component
 public class JwtUtil {
 
     private static final String SECRET =
-            "hurryflex_super_secret_key_1234567890_secure_minimum_length_123";
+            "hurryflex_super_secret_key_which_should_be_long_enough_123456";
 
-    private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private Key getKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
 
-    public static String generateToken(String username, String role) {
+    // =========================
+    // GENERATE TOKEN
+    // =========================
+    public String generateToken(String email, String role) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public static String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+    // =========================
+    // EXTRACT USERNAME
+    // =========================
+    public String extractUsername(String token) {
+        return parseClaims(token).getSubject();
     }
 
-    public static String extractRole(String token) {
-        return extractAllClaims(token).get("role", String.class);
+    // =========================
+    // EXTRACT ROLE
+    // =========================
+    public String extractRole(String token) {
+        return parseClaims(token).get("role", String.class);
     }
 
-    public static boolean validateToken(String token) {
+    // =========================
+    // VALIDATION
+    // =========================
+    public boolean isTokenValid(String token, String email) {
         try {
-            extractAllClaims(token);
-            return true;
+            return extractUsername(token).equals(email)
+                    && !isExpired(token);
         } catch (Exception e) {
             return false;
         }
     }
 
-    private static Claims extractAllClaims(String token) {
+    private boolean isExpired(String token) {
+        return parseClaims(token).getExpiration().before(new Date());
+    }
+
+    private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(getKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

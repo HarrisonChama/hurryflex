@@ -1,57 +1,61 @@
 package com.hurryflex.hurryflex.service.impl;
 
-import java.util.Comparator;
+import com.hurryflex.hurryflex.dto.ReactionEvent;
+import com.hurryflex.hurryflex.dto.ReactionRequest;
+import com.hurryflex.hurryflex.dto.ReactionSummaryResponse;
+import com.hurryflex.hurryflex.model.*;
+import com.hurryflex.hurryflex.repository.ReactionRepository;
+import com.hurryflex.hurryflex.mapper.ReactionMapper;
+import com.hurryflex.hurryflex.service.ReactionService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import com.hurryflex.hurryflex.dto.ReactionRequest;
-import com.hurryflex.hurryflex.dto.ReactionSummaryResponse;
-import com.hurryflex.hurryflex.model.Reaction;
-import com.hurryflex.hurryflex.model.ReactionTargetType;
-import com.hurryflex.hurryflex.model.ReactionType;
-import com.hurryflex.hurryflex.model.User;
-import com.hurryflex.hurryflex.repository.ReactionRepository;
-import com.hurryflex.hurryflex.repository.UserRepository;
-import com.hurryflex.hurryflex.service.ReactionService;
 
 @Service
 public class ReactionServiceImpl implements ReactionService {
 
     private final ReactionRepository reactionRepository;
-    private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public ReactionServiceImpl(ReactionRepository reactionRepository,
-                               UserRepository userRepository) {
+                               SimpMessagingTemplate messagingTemplate) {
         this.reactionRepository = reactionRepository;
-        this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Override
-    public void react(String email, ReactionRequest request) {
+    public ReactionSummaryResponse react(String email, ReactionRequest request) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Reaction reaction = reactionRepository
+                .findByUserEmailAndTargetTypeAndTargetId(
+                        email,
+                        request.getTargetType(),
+                        request.getTargetId()
+                )
+                .orElse(null);
 
-        Reaction reaction = new Reaction();
-        reaction.setUser(user);
-        reaction.setType(request.getType());
-        reaction.setTargetType(request.getTargetType());
-        reaction.setTargetId(request.getTargetId());
+        if (reaction != null) {
+            reaction.setType(request.getType());
+        } else {
+            reaction = new Reaction();
+            reaction.setUserEmail(email);
+            reaction.setTargetType(request.getTargetType());
+            reaction.setTargetId(request.getTargetId());
+            reaction.setType(request.getType());
+        }
 
         reactionRepository.save(reaction);
-    }
-
-    @Override
-    public ReactionSummaryResponse getReactionSummary(ReactionTargetType targetType,
-                                                      Long targetId) {
 
         List<Reaction> reactions =
-                reactionRepository.findByTargetTypeAndTargetId(targetType, targetId);
+                reactionRepository.findByTargetTypeAndTargetId(
+                        request.getTargetType(),
+                        request.getTargetId()
+                );
 
-        Map<ReactionType, Long> breakdown =
+        Map<ReactionType, Long> counts =
                 reactions.stream()
                         .collect(Collectors.groupingBy(
                                 Reaction::getType,
@@ -60,22 +64,52 @@ public class ReactionServiceImpl implements ReactionService {
 
         long total = reactions.size();
 
-        ReactionType topType = breakdown.entrySet()
-                .stream()
-                .max(Comparator.comparingLong(Map.Entry::getValue))
+        // 🔥 REAL-TIME PUSH (WebSocket)
+        messagingTemplate.convertAndSend(
+                "/topic/reactions/" +
+                        request.getTargetType() +
+                        "/" +
+                        request.getTargetId(),
+                new ReactionEvent(
+                        request.getTargetId(),
+                        request.getTargetType(),
+                        request.getType(),
+                        total,
+                        ReactionMapper.toEmoji(request.getType())
+                )
+        );
+
+        return new ReactionSummaryResponse(
+                counts,
+                total,
+                request.getType(),
+                ReactionMapper.toEmoji(request.getType())
+        );
+    }
+
+    @Override
+    public ReactionSummaryResponse getReactions(ReactionTargetType targetType, Long targetId) {
+
+        List<Reaction> reactions =
+                reactionRepository.findByTargetTypeAndTargetId(targetType, targetId);
+
+        Map<ReactionType, Long> counts =
+                reactions.stream()
+                        .collect(Collectors.groupingBy(
+                                Reaction::getType,
+                                Collectors.counting()
+                        ));
+
+        ReactionType topReaction = counts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse(null);
 
-        ReactionSummaryResponse response = new ReactionSummaryResponse();
-        response.setBreakdown(breakdown);
-        response.setTotalReactions(total);
-
-        response.setTopReactionEmoji(
-                topType != null ? topType.name() : null
+        return new ReactionSummaryResponse(
+                counts,
+                reactions.size(),
+                topReaction,
+                topReaction != null ? ReactionMapper.toEmoji(topReaction) : null
         );
-
-        response.setSummaryText(total + " reactions");
-
-        return response;
     }
 }

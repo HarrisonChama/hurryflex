@@ -110,7 +110,7 @@ public class PostServiceImpl implements PostService {
                             summary.getBreakdown(),
                             summary.getTotalReactions(),
                             summary.getTopReactionEmoji(),
-                            summary.getSummaryText()
+                            summary.getTotalReactions() + " reactions"
                     );
                 })
                 .toList();
@@ -150,8 +150,8 @@ public class PostServiceImpl implements PostService {
         ReactionSummaryResponse response = new ReactionSummaryResponse();
         response.setBreakdown(breakdown);
         response.setTotalReactions(totalReactions);
+        response.setTopReaction(topReaction);
         response.setTopReactionEmoji(emoji);
-        response.setSummaryText(totalReactions + " reactions");
 
         return response;
     }
