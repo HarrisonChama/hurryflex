@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hurryflex.hurryflex.dto.CreatePostRequest;
@@ -58,13 +59,27 @@ public class PostController {
     }
 
     // =========================
-    // FACEBOOK FEED
+    // FACEBOOK FEED (PAGINATION)
     // =========================
     @GetMapping("/feed")
-    public List<PostFeedResponse> getFeed(Authentication authentication) {
+    public List<PostFeedResponse> getFeed(
+
+            Authentication authentication,
+
+            @RequestParam(defaultValue = "0")
+            int page,
+
+            @RequestParam(defaultValue = "10")
+            int size
+    ) {
 
         String email = authentication.getName();
-        return postService.getFeed(email);
+
+        return postService.getFeed(
+                email,
+                page,
+                size
+        );
     }
 
     // =========================

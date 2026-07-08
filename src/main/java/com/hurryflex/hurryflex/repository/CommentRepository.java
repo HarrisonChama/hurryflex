@@ -9,12 +9,34 @@ import com.hurryflex.hurryflex.model.Post;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    // All top-level comments for a post
-    List<Comment> findByPostAndParentCommentIsNullOrderByCreatedAtAsc(Post post);
 
-    // All comments for a post (kept for compatibility if needed)
-    List<Comment> findByPostOrderByCreatedAtAsc(Post post);
+    // =========================
+    // TOP LEVEL COMMENTS
+    // =========================
+    List<Comment> findByPostAndParentCommentIsNullOrderByCreatedAtAsc(
+            Post post
+    );
 
-    // All replies to a specific comment
-    List<Comment> findByParentCommentOrderByCreatedAtAsc(Comment parentComment);
+
+    // =========================
+    // ALL COMMENTS
+    // =========================
+    List<Comment> findByPostOrderByCreatedAtAsc(
+            Post post
+    );
+
+
+    // =========================
+    // REPLIES
+    // =========================
+    List<Comment> findByParentCommentOrderByCreatedAtAsc(
+            Comment parentComment
+    );
+
+
+    // =========================
+    // FEED OPTIMIZATION
+    // =========================
+    long countByPost(Post post);
+
 }

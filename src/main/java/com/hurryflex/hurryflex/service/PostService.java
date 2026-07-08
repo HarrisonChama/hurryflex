@@ -25,9 +25,13 @@ public interface PostService {
     List<Post> getAllPosts();
 
     // =========================
-    // FACEBOOK FEED
+    // FACEBOOK FEED (PAGINATED)
     // =========================
-    List<PostFeedResponse> getFeed(String email);
+    List<PostFeedResponse> getFeed(
+            String email,
+            int page,
+            int size
+    );
 
     // =========================
     // DELETE POST
